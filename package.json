@@ -1,0 +1,14 @@
+{
+  "name": "updata-lambda-edge-function",
+  "version": "1.0.0",
+  "description": "Updates the version of a Lambda@Edge function used in a Cloudfront distribution",
+  "main": "update-lambda-edge-function.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Einar Egilsson",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.984.0"
+  }
+}

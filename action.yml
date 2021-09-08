@@ -1,0 +1,26 @@
+name: 'Update Lambda@Edge Function'
+description: 'Updates a Cloudfront distribution with a new version of a Lambda@Edge function'
+author: 'Einar Egilsson'
+runs:
+  using: 'node12'
+  main: 'update-lambda-edge-function.js'
+inputs:
+  aws_access_key:
+    description: 'AWS Access Key'
+    required: true
+  aws_secret_key:
+    description: 'AWS Secret Key'
+    required: true
+  function_name:
+    description: 'Name of the function to update. Not a full ARN, just a simple name.'
+    required: true
+  new_version_nr:
+    description: 'The version nr of the function you want to use in your Cloudfront distribution.'
+    required: true
+  cloudfront_distribution_id:
+    description: 'The Id of the Cloudfront distribution that you want to update.'
+    required: true
+
+branding:
+  icon: 'arrow-up'  
+  color: 'green'
