@@ -5,11 +5,11 @@ runs:
   using: 'node12'
   main: 'update-lambda-edge-function.js'
 inputs:
-  aws_access_key:
-    description: 'AWS Access Key'
+  aws_access_key_id:
+    description: 'AWS Access Key Id'
     required: true
-  aws_secret_key:
-    description: 'AWS Secret Key'
+  aws_secret_access_key:
+    description: 'AWS Secret Access Key'
     required: true
   function_name:
     description: 'Name of the function to update. Not a full ARN, just a simple name.'
