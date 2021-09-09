@@ -20,6 +20,10 @@ if (!IS_GITHUB_ACTION) {
     }
 }
 
+function warn(msg) {
+    console.log(`::warning::${msg}`);
+}
+
 function fail(error) {
     if (IS_GITHUB_ACTION) {
         console.log(`::error::ERROR: ${error}\n`);
@@ -54,7 +58,7 @@ if (!funcName.match(/^[a-zA-Z]\w+$/)) {
 const isDryRun = !!strip(process.env.INPUT_DRY_RUN).match(/true|1/i); 
 
 if (isDryRun) {
-    console.log('***** THIS IS A DRY RUN. THE DISTRIBUTION WILL NOT BE UPDATED, WE WILL ONLY SHOW HOW THE CONFIG WOULD BE CHANGED.');
+    warn('***** THIS IS A DRY RUN. THE DISTRIBUTION WILL NOT BE UPDATED, WE WILL ONLY SHOW HOW THE CONFIG WOULD BE CHANGED.');
 }
 
 let prevArnWithoutVersion;
@@ -143,7 +147,7 @@ getDistributionConfig(distributionId).then(result => {
     if (isDryRun) {
         console.log('The updated distribution configuration that we would send to Cloudfront in a real run looks like this:\n');
         console.log(JSON.stringify(distributionConfig, null, 2));
-        console.log('\n\n***** DRY RUN FINISHED. RUN THE ACTION AGAIN WITHOUT SETTING dry_run=true TO ACTUALLY UPDATE YOUR DISTRIBUTION.\n');
+        warn('\n\n***** DRY RUN FINISHED. RUN THE ACTION AGAIN WITHOUT SETTING dry_run=true TO ACTUALLY UPDATE YOUR DISTRIBUTION.\n');
         process.exit(0);
     }
 
