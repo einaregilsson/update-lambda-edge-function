@@ -127,7 +127,7 @@ cloudfront.getDistributionConfig({Id: distributionId}, function(err, data) {
     if (isDryRun) {
         console.log('The updated distribution configuration that we would send to Cloudfront in a real run looks like this:\n');
         console.log(JSON.stringify(distributionConfig, null, 2));
-        console.log('\n\n***** DRY RUN FINISHED. RUN THE ACTION AGAIN WITHOUT SETTING dry_run=true TO ACTUALLY UPDATE YOUR DISTRIBUTION.');
+        console.log('\n\n***** DRY RUN FINISHED. RUN THE ACTION AGAIN WITHOUT SETTING dry_run=true TO ACTUALLY UPDATE YOUR DISTRIBUTION.\n');
         process.exit(0);
     }
 
@@ -141,6 +141,6 @@ cloudfront.getDistributionConfig({Id: distributionId}, function(err, data) {
         console.log('Result of distribution update:');
         console.log(JSON.stringify(data, null, 2));
 
-        console.log('\n\nUpdate was successful. It may take a few minutes for the changes to the distribution to be fully deployed.');
+        console.log('\n\nUpdate was successful. It may take a few minutes for the changes to the distribution to be fully deployed.\n');
     });
 });
