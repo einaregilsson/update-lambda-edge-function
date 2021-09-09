@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 // Author: Einar Egilsson, https://github.com/einaregilsson/update-lambda-edge-function
 
-const aws = require('aws-sdk');
-
 const awsApiRequest = require('./aws-api-request');
 
 const env = process.env;
@@ -38,10 +36,10 @@ function strip(val) {
 
 //Process input params
 
-let awsAccessKey = env.INPUT_AWS_ACCESS_KEY_ID || env.AWS_ACCESS_KEY_ID,
-    awsSecretAccessKey = env.INPUT_AWS_SECRET_ACCESS_KEY || env.AWS_SECRET_ACCESS_KEY;
+awsApiRequest.accessKey = env.INPUT_AWS_ACCESS_KEY_ID || env.AWS_ACCESS_KEY_ID,
+    awsApiRequest.secretKey = env.INPUT_AWS_SECRET_ACCESS_KEY || env.AWS_SECRET_ACCESS_KEY;
 
-if (!awsAccessKey || !awsSecretAccessKey) {
+if (!awsApiRequest.accessKey || !awsApiRequest.secretKey) {
     fail('AWS access key id or secret access key are not configured correctly.');    
 }
 
@@ -64,7 +62,6 @@ if (isDryRun) {
 }
 
 
-const cloudfront = new aws.CloudFront({credentials: new aws.Credentials(env.AWS_ACCESS_KEY_ID, env.AWS_SECRET_ACCESS_KEY)});
 let prevArnWithoutVersion;
 
 function getDistributionConfig(distributionId) {
