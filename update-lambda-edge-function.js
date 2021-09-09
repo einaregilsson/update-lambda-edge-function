@@ -147,7 +147,8 @@ getDistributionConfig(distributionId).then(result => {
     if (isDryRun) {
         console.log('The updated distribution configuration that we would send to Cloudfront in a real run looks like this:\n');
         console.log(JSON.stringify(distributionConfig, null, 2));
-        warn('\n\n***** DRY RUN FINISHED. RUN THE ACTION AGAIN WITHOUT SETTING dry_run=true TO ACTUALLY UPDATE YOUR DISTRIBUTION.\n');
+        console.log('\n\n');
+        warn('***** DRY RUN FINISHED. RUN THE ACTION AGAIN WITHOUT SETTING dry_run=true TO ACTUALLY UPDATE YOUR DISTRIBUTION.\n');
         process.exit(0);
     }
 
