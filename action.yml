@@ -20,6 +20,10 @@ inputs:
   cloudfront_distribution_id:
     description: 'The Id of the Cloudfront distribution that you want to update.'
     required: true
+  dry_run:
+    description: 'Set to "true" to only print out the configuration update, to see what would be done in a real run.'
+    required: false
+    default: false
 
 branding:
   icon: 'arrow-up'  
