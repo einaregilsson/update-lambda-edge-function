@@ -3,6 +3,8 @@
 
 const aws = require('aws-sdk');
 
+const awsApiRequest = require('./aws-api-request');
+
 const env = process.env;
 const IS_GITHUB_ACTION = !!process.env.GITHUB_ACTIONS;
 
@@ -65,16 +67,41 @@ if (isDryRun) {
 const cloudfront = new aws.CloudFront({credentials: new aws.Credentials(env.AWS_ACCESS_KEY_ID, env.AWS_SECRET_ACCESS_KEY)});
 let prevArnWithoutVersion;
 
+function getDistributionConfig(distributionId) {
+    return awsApiRequest({
+        service: 'cloudfront',
+        path: `/2020-05-31/distribution/${distributionId}/config`,
+        region: 'us-east-1',
+        host: 'cloudfront.amazonaws.com'
+    });
+}
 
-cloudfront.getDistributionConfig({Id: distributionId}, function(err, data) {
+function updateDistribution(distributionId, distributionConfig, etag) {
+    return awsApiRequest({
+        service: 'cloudfront',
+        path: `/2020-05-31/distribution/${distributionId}/config`,
+        region: 'us-east-1',
+        host: 'cloudfront.amazonaws.com',
+        method: 'PUT',
+        payload: JSON.stringify(distributionConfig),
+        headers: { 'Content-Type': 'application/json', 'If-Match' : etag }
+    });
+}
 
-    if (err) {
-        fail(err);
+function validateResult(result) {
+    if (result.statusCode !== 200) {
+        let extraMsg = result.data && result.data.Message || '';
+        fail(`Request returned with unexpected statusCode: ${result.statusCode}. ${extraMsg}\n\nFull Response:\n\n ${JSON.stringify(result, null, 2)}`);
     }
+}
 
-    let etag = data.ETag;
+getDistributionConfig(distributionId).then(result => {
 
-    let distributionConfig = data.DistributionConfig;
+    validateResult(result);
+
+    const etag = result.headers.etag;
+    let distributionConfig = result.data;
+    console.log('Got distribution, etag: ' + etag);
 
     let cacheBehaviours = [distributionConfig.DefaultCacheBehavior];
     if (distributionConfig.CacheBehaviors && distributionConfig.CacheBehaviors.Items) {
@@ -93,23 +120,26 @@ cloudfront.getDistributionConfig({Id: distributionId}, function(err, data) {
     let rx = new RegExp(`:function:${funcName}:\\d+$`);
 
     for (let cb of cacheBehaviours) {
-        for (let func of cb.LambdaFunctionAssociations.Items) {
+        console.log('IS: ' + JSON.stringify(cb.LambdaFunctionAssociations))
+        if (cb.LambdaFunctionAssociations.Items !== null) {
+            for (let func of cb.LambdaFunctionAssociations.Items) {
             
-            if (func.LambdaFunctionARN.match(rx)) {
-                
-                console.log(`Found ARN matching function name ${funcName}: ${func.LambdaFunctionARN}`);
-                let arnWithoutVersion = func.LambdaFunctionARN.replace(/:\d+$/, '');
-
-                if (prevArnWithoutVersion && prevArnWithoutVersion !== arnWithoutVersion) {
-                    fail(`ERROR: Two possible matches for func name "${funcName}". Both "${prevArnWithoutVersion}" and "${arnWithoutVersion}" match, aborting!`)
-                } 
-                prevFuncWithoutArn = arnWithoutVersion;
-
-                //Replace the version nr at the end
-                let fullNewFunctionArn = arnWithoutVersion + ':' + newFuncVersion;
-                console.log(`Updating function arn on path ${cb.PathPattern} from \n\n   ${func.LambdaFunctionARN} \n\nto \n\n   ${fullNewFunctionArn}\n`);
-                func.LambdaFunctionARN = fullNewFunctionArn;
-                countUpdated++;
+                if (func.LambdaFunctionARN.match(rx)) {
+                    
+                    console.log(`Found ARN matching function name ${funcName}: ${func.LambdaFunctionARN}`);
+                    let arnWithoutVersion = func.LambdaFunctionARN.replace(/:\d+$/, '');
+    
+                    if (prevArnWithoutVersion && prevArnWithoutVersion !== arnWithoutVersion) {
+                        fail(`ERROR: Two possible matches for func name "${funcName}". Both "${prevArnWithoutVersion}" and "${arnWithoutVersion}" match, aborting!`)
+                    } 
+                    prevFuncWithoutArn = arnWithoutVersion;
+    
+                    //Replace the version nr at the end
+                    let fullNewFunctionArn = arnWithoutVersion + ':' + newFuncVersion;
+                    console.log(`Updating function arn on path ${cb.PathPattern} from \n\n   ${func.LambdaFunctionARN} \n\nto \n\n   ${fullNewFunctionArn}\n`);
+                    func.LambdaFunctionARN = fullNewFunctionArn;
+                    countUpdated++;
+                }
             }
         }
     }
@@ -117,12 +147,6 @@ cloudfront.getDistributionConfig({Id: distributionId}, function(err, data) {
     if (countUpdated === 0) {
         fail(`Found no Lambda@Edge function matching the name "${funcName}" in distribution ${distributionId}`);
     }
-
-    let params = {
-        Id: distributionId,
-        DistributionConfig: distributionConfig,
-        IfMatch: etag
-    };
 
     if (isDryRun) {
         console.log('The updated distribution configuration that we would send to Cloudfront in a real run looks like this:\n');
@@ -133,14 +157,19 @@ cloudfront.getDistributionConfig({Id: distributionId}, function(err, data) {
 
     console.log('About to update distribution...\n');
 
-    cloudfront.updateDistribution(params, function(err, result) {
-        if (err) {
-            fail(err);
-        }
+    return updateDistribution(distributionId, distributionConfig, etag);
 
-        console.log('Result of distribution update:');
-        console.log(JSON.stringify(data, null, 2));
+}).then(result => {
 
-        console.log('\n\nUpdate was successful. It may take a few minutes for the changes to the distribution to be fully deployed.\n');
-    });
+    validateResult(result);
+
+    console.log('Result of distribution update:');
+    console.log(JSON.stringify(result.data, null, 2));
+
+    console.log('\n\nUpdate was successful. It may take a few minutes for the changes to the distribution to be fully deployed.\n');
+
+}).catch(err => {
+    fail(err);
 });
+
+
