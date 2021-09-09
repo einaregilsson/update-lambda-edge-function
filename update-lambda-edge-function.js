@@ -51,7 +51,7 @@ if (!funcName.match(/^[a-zA-Z]\w+$/)) {
     fail(`Invalid distribution id: "${distributionId}"`);
 } 
 
-const isDryRun = !!strip(process.env.DRY_RUN).match(/true|1/i); 
+const isDryRun = !!strip(process.env.INPUT_DRY_RUN).match(/true|1/i); 
 
 if (isDryRun) {
     console.log('***** THIS IS A DRY RUN. THE DISTRIBUTION WILL NOT BE UPDATED, WE WILL ONLY SHOW HOW THE CONFIG WOULD BE CHANGED.');
