@@ -41,14 +41,14 @@ awsApiRequest.secretKey = env.INPUT_AWS_SECRET_ACCESS_KEY || env.AWS_SECRET_ACCE
 
 var funcName = strip(env.INPUT_FUNCTION_NAME),
     newFuncVersion = strip(env.INPUT_NEW_VERSION_NR),
-    distributionId = strip(env.CLOUDFRONT_DISTRIBUTION_ID);
+    distributionId = strip(env.INPUT_CLOUDFRONT_DISTRIBUTION_ID);
 
 if (!funcName.match(/^[a-zA-Z]\w+$/)) {
     fail(`Invalid function name "${funcName}". Should only be a simple name, not a full ARN, or anything with special characters.`);
 } else if (!newFuncVersion.match(/^\d+$/)) {
     fail(`Invalid version nr: "${newFuncVersion}". Must be a normal positive number`);
 } else if (!distributionId.match(/^\w+$/)) {
-    fail(`Invalid distribution id: ${distributionId}`);
+    fail(`Invalid distribution id: "${distributionId}"`);
 } 
 
 const isDryRun = !!strip(process.env.DRY_RUN).match(/true|1/i); 
