@@ -36,12 +36,8 @@ function strip(val) {
 
 //Process input params
 
-awsApiRequest.accessKey = env.INPUT_AWS_ACCESS_KEY_ID || env.AWS_ACCESS_KEY_ID,
-    awsApiRequest.secretKey = env.INPUT_AWS_SECRET_ACCESS_KEY || env.AWS_SECRET_ACCESS_KEY;
-
-if (!awsApiRequest.accessKey || !awsApiRequest.secretKey) {
-    fail('AWS access key id or secret access key are not configured correctly.');    
-}
+awsApiRequest.accessKey = env.INPUT_AWS_ACCESS_KEY_ID || env.AWS_ACCESS_KEY_ID;
+awsApiRequest.secretKey = env.INPUT_AWS_SECRET_ACCESS_KEY || env.AWS_SECRET_ACCESS_KEY;
 
 var funcName = strip(env.INPUT_FUNCTION_NAME),
     newFuncVersion = strip(env.INPUT_NEW_VERSION_NR),
@@ -60,7 +56,6 @@ const isDryRun = !!strip(process.env.DRY_RUN).match(/true|1/i);
 if (isDryRun) {
     console.log('***** THIS IS A DRY RUN. THE DISTRIBUTION WILL NOT BE UPDATED, WE WILL ONLY SHOW HOW THE CONFIG WOULD BE CHANGED.');
 }
-
 
 let prevArnWithoutVersion;
 
