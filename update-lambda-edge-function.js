@@ -47,7 +47,7 @@ var funcName = strip(env.INPUT_FUNCTION_NAME),
     newFuncVersion = strip(env.INPUT_NEW_VERSION_NR),
     distributionId = strip(env.INPUT_CLOUDFRONT_DISTRIBUTION_ID);
 
-if (!funcName.match(/^[a-zA-Z]\w+$/)) {
+if (!funcName.match(/^[a-zA-Z][a-zA-Z0-9_-]+$/)) {
     fail(`Invalid function name "${funcName}". Should only be a simple name, not a full ARN, or anything with special characters.`);
 } else if (!newFuncVersion.match(/^\d+$/)) {
     fail(`Invalid version nr: "${newFuncVersion}". Must be a normal positive number`);
